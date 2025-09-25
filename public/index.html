@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeacherVault Analytics - Real-Time Administrative Automation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #0F1117;
+            --bg-secondary: #1A1D29;
+            --bg-card: #1E2139;
+            --border: #2A2E47;
+            --text-primary: #FFFFFF;
+            --text-secondary: #9CA3AF;
+            --text-tertiary: #6B7280;
+            --accent-blue: #3B82F6;
+            --accent-purple: #8B5CF6;
+            --accent-green: #10B981;
+            --accent-red: #EF4444;
+            --accent-yellow: #F59E0B;
+            --gradient-1: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            --gradient-2: linear-gradient(135deg, #F093FB 0%, #F5576C 100%);
+            --gradient-3: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);
+            --gradient-4: linear-gradient(135deg, #43E97B 0%, #38F9D7 100%);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+        }
+        
+        .header-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        
+        .logo-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .header-stat {
+            text-align: center;
+        }
+        
+        .header-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gradient-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        /* Main Grid */
+        .main-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 1.5rem;
+            grid-template-areas:
+                "metrics metrics metrics metrics"
+                "stream stream pipeline pipeline"
+                "calendar calendar calendar impact"
+                "trends trends activity activity";
+        }
+        
+        /* Card Base */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .card-badge {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            font-size: 0.625rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 700;
+        }
+        
+        /* Metrics Row */
+        .metrics-row {
+            grid-area: metrics;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+        }
+        
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+        }
+        
+        .metric-change.positive {
+            color: var(--accent-green);
+        }
+        
+        .metric-change.negative {
+            color: var(--accent-red);
+        }
+        
+        .metric-sparkline {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            opacity: 0.3;
+        }
+        
+        /* Email Stream */
+        .email-stream {
+            grid-area: stream;
+        }
+        
+        .email-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .email-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .email-item:hover {
+            border-color: var(--accent-purple);
+            transform: translateX(4px);
+        }
+        
+        .email-item.processing {
+            border-color: var(--accent-yellow);
+            background: linear-gradient(90deg, var(--bg-secondary) 0%, rgba(245, 158, 11, 0.1) 100%);
+        }
+        
+        .email-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--gradient-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+        
+        .email-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .email-from {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .email-subject {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .email-preview {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .email-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+        
+        .email-time {
+            font-size: 0.625rem;
+            color: var(--text-tertiary);
+        }
+        
+        .email-status {
+            font-size: 0.625rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .email-status.new {
+            background: var(--accent-yellow);
+            color: var(--bg-primary);
+        }
+        
+        .email-status.processed {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+        }
+        
+        /* Processing Pipeline */
+        .pipeline {
+            grid-area: pipeline;
+        }
+        
+        .pipeline-viz {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 2rem 0;
+        }
+        
+        .pipeline-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.625rem;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .pipeline-node.active {
+            background: var(--gradient-1);
+            border-color: transparent;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+        
+        .pipeline-connector {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pipeline-connector::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-1);
+            animation: flow 2s linear infinite;
+        }
+        
+        @keyframes flow {
+            to { left: 100%; }
+        }
+        
+        .pipeline-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        
+        .pipeline-stat {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+        
+        .pipeline-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .pipeline-stat-label {
+            font-size: 0.625rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+        }
+        
+        /* Calendar View */
+        .calendar {
+            grid-area: calendar;
+        }
+        
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .day-column {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            min-height: 200px;
+        }
+        
+        .day-header {
+            font-size: 0.625rem;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        
+        .time-block {
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-size: 0.625rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .time-block.admin {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--accent-red);
+        }
+        
+        .time-block.freed {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--accent-green);
+            position: relative;
+        }
+        
+        .time-block.freed::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+        
+        /* Impact Panel */
+        .impact {
+            grid-area: impact;
+        }
+        
+        .impact-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .impact-item {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-green);
+        }
+        
+        .impact-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .impact-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Trends */
+        .trends {
+            grid-area: trends;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+        
+        /* Activity Feed */
+        .activity {
+            grid-area: activity;
+        }
+        
+        .activity-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .activity-icon.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+        }
+        
+        .activity-icon.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-yellow);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-action {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-details {
+            font-size: 0.625rem;
+            color: var(--text-tertiary);
+        }
+        
+        .activity-time {
+            font-size: 0.625rem;
+            color: var(--text-tertiary);
+        }
+        
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+        }
+        
+        .fab svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
+            stroke-width: 2;
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .animate-slide {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .time-float {
+            position: fixed;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            animation: floatUp 2s ease-out forwards;
+            pointer-events: none;
+            z-index: 10000;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">T</div>
+                <div class="logo-text">TeacherVault</div>
+            </div>
+            
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="header-stat-value" id="totalHours">47.3</div>
+                    <div class="header-stat-label">Hours Saved</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="totalTasks">1,247</div>
+                    <div class="header-stat-label">Tasks Automated</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value">98.7%</div>
+                    <div class="header-stat-label">Accuracy Rate</div>
+                </div>
+            </div>
+            
+            <div class="user-info">
+                <div>
+                    <div style="font-size: 0.875rem; font-weight: 600;">Sarah Johnson</div>
+                    <div style="font-size: 0.75rem; color: var(--text-tertiary);">Lincoln Elementary</div>
+                </div>
+                <div class="user-avatar">SJ</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Metrics Row -->
+        <div class="metrics-row">
+            <div class="metric-card">
+                <div class="metric-label">Active Processing</div>
+                <div class="metric-value" id="activeCount">0</div>
+                <div class="metric-change positive">
+                    <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"/>
+                    </svg>
+                    <span>12% vs last hour</span>
+                </div>
+                <canvas class="metric-sparkline" id="spark1"></canvas>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Response Time</div>
+                <div class="metric-value">2.3s</div>
+                <div class="metric-change positive">
+                    <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"/>
+                    </svg>
+                    <span>0.4s faster</span>
+                </div>
+                <canvas class="metric-sparkline" id="spark2"></canvas>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Queue Depth</div>
+                <div class="metric-value" id="queueDepth">0</div>
+                <div class="metric-change negative">
+                    <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z"/>
+                    </svg>
+                    <span id="queueChange">+0 pending</span>
+                </div>
+                <canvas class="metric-sparkline" id="spark3"></canvas>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Today's Impact</div>
+                <div class="metric-value" id="todayTime">2.7h</div>
+                <div class="metric-change positive">
+                    <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"/>
+                    </svg>
+                    <span>On track for 8h</span>
+                </div>
+                <canvas class="metric-sparkline" id="spark4"></canvas>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Success Rate</div>
+                <div class="metric-value">99.2%</div>
+                <div class="metric-change positive">
+                    <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"/>
+                    </svg>
+                    <span>0 errors today</span>
+                </div>
+                <canvas class="metric-sparkline" id="spark5"></canvas>
+            </div>
+        </div>
+
+        <!-- Email Stream -->
+        <div class="card email-stream">
+            <div class="card-header">
+                <h3 class="card-title">Email Stream</h3>
+                <span class="card-badge" id="connectionBadge">CONNECTING...</span>
+            </div>
+            <div class="email-list" id="emailList">
+                <!-- Emails will be populated here -->
+            </div>
+        </div>
+
+        <!-- Processing Pipeline -->
+        <div class="card pipeline">
+            <div class="card-header">
+                <h3 class="card-title">Processing Pipeline</h3>
+                <span class="card-badge">LIVE</span>
+            </div>
+            <div class="pipeline-viz">
+                <div class="pipeline-node" id="node1">SCAN</div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-node" id="node2">PARSE</div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-node" id="node3">ROUTE</div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-node" id="node4">EXEC</div>
+            </div>
+            <div class="pipeline-stats">
+                <div class="pipeline-stat">
+                    <div class="pipeline-stat-value" id="pipelineIn">0</div>
+                    <div class="pipeline-stat-label">Incoming</div>
+                </div>
+                <div class="pipeline-stat">
+                    <div class="pipeline-stat-value" id="pipelineProc">0</div>
+                    <div class="pipeline-stat-label">Processing</div>
+                </div>
+                <div class="pipeline-stat">
+                    <div class="pipeline-stat-value" id="pipelineOut">0</div>
+                    <div class="pipeline-stat-label">Completed</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="card calendar">
+            <div class="card-header">
+                <h3 class="card-title">Weekly Schedule Transform</h3>
+            </div>
+            <div class="week-grid">
+                <div class="day-column">
+                    <div class="day-header">MON</div>
+                    <div class="time-block freed">8:00-3:30 Teaching</div>
+                    <div class="time-block freed">3:30-5:00 FREE</div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">TUE</div>
+                    <div class="time-block freed">8:00-3:30 Teaching</div>
+                    <div class="time-block admin" id="tue-block">3:30-6:00 Admin</div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">WED</div>
+                    <div class="time-block freed">8:00-3:30 Teaching</div>
+                    <div class="time-block admin" id="wed-block">3:30-5:30 Emails</div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">THU</div>
+                    <div class="time-block freed">8:00-3:30 Teaching</div>
+                    <div class="time-block admin" id="thu-block">3:30-5:00 Tasks</div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">FRI</div>
+                    <div class="time-block freed">8:00-2:30 Teaching</div>
+                    <div class="time-block freed">2:30-3:30 FREE</div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">SAT</div>
+                    <div class="time-block freed">All Day FREE</div>
+                </div>
+                <div class="day-column">
+                    <div class="day-header">SUN</div>
+                    <div class="time-block freed">All Day FREE</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Impact -->
+        <div class="card impact">
+            <div class="card-header">
+                <h3 class="card-title">Life Impact</h3>
+            </div>
+            <div class="impact-metrics">
+                <div class="impact-item">
+                    <div class="impact-value">4 nights</div>
+                    <div class="impact-label">Family dinners this week</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-value">0 hours</div>
+                    <div class="impact-label">Weekend work required</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-value">98%</div>
+                    <div class="impact-label">Parent satisfaction rate</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-value">3 days</div>
+                    <div class="impact-label">Left before 5pm</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trends -->
+        <div class="card trends">
+            <div class="card-header">
+                <h3 class="card-title">Time Savings Trend</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="card activity">
+            <div class="card-header">
+                <h3 class="card-title">Recent Activity</h3>
+            </div>
+            <div class="activity-list" id="activityList">
+                <!-- Activities will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="simulateEmail()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+    </button>
+
+    <script>
+        // WebSocket connection to backend
+        let ws = null;
+        let reconnectInterval = null;
+        
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:3001');
+            
+            ws.onopen = () => {
+                console.log('✅ Connected to TeacherVault backend');
+                document.getElementById('connectionBadge').textContent = 'CONNECTED';
+                document.getElementById('connectionBadge').style.background = '#10B981';
+                
+                if (reconnectInterval) {
+                    clearInterval(reconnectInterval);
+                    reconnectInterval = null;
+                }
+            };
+            
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                console.log('Received:', msg.type);
+                
+                switch(msg.type) {
+                    case 'INITIAL_STATE':
+                        if (msg.data.metrics) {
+                            updateAllMetrics(msg.data.metrics);
+                        }
+                        if (msg.data.pipeline) {
+                            updatePipelineStats(msg.data.pipeline);
+                        }
+                        break;
+                        
+                    case 'NEW_EMAIL':
+                        addEmailToStream(msg.data);
+                        break;
+                        
+                    case 'PROCESSING_STAGE':
+                        animatePipelineNode(msg.data.stage);
+                        break;
+                        
+                    case 'WORKFLOW_EXECUTED':
+                        addActivityItem(msg.data);
+                        break;
+                        
+                    case 'EMAIL_COMPLETED':
+                        completeEmailProcessing(msg.data);
+                        break;
+                        
+                    case 'PIPELINE_UPDATE':
+                        updatePipelineStats(msg.data.pipeline);
+                        if (msg.data.activeProcessing !== undefined) {
+                            document.getElementById('activeCount').textContent = msg.data.activeProcessing;
+                        }
+                        break;
+                }
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                document.getElementById('connectionBadge').textContent = 'ERROR';
+                document.getElementById('connectionBadge').style.background = '#EF4444';
+            };
+            
+            ws.onclose = () => {
+                console.log('❌ Disconnected from backend');
+                document.getElementById('connectionBadge').textContent = 'DISCONNECTED';
+                document.getElementById('connectionBadge').style.background = '#EF4444';
+                
+                // Try to reconnect every 3 seconds
+                if (!reconnectInterval) {
+                    reconnectInterval = setInterval(() => {
+                        console.log('Attempting to reconnect...');
+                        connectWebSocket();
+                    }, 3000);
+                }
+            };
+        }
+        
+        // Connect on page load
+        connectWebSocket();
+        
+        // Update all metrics
+        function updateAllMetrics(metrics) {
+            document.getElementById('totalHours').textContent = metrics.totalHours.toFixed(1);
+            document.getElementById('totalTasks').textContent = metrics.totalTasks.toLocaleString();
+            document.getElementById('todayTime').textContent = metrics.todayTime.toFixed(1) + 'h';
+            document.getElementById('activeCount').textContent = metrics.activeProcessing;
+            document.getElementById('queueDepth').textContent = metrics.queueDepth;
+            document.getElementById('queueChange').textContent = `+${metrics.queueDepth} pending`;
+        }
+        
+        // Update pipeline stats
+        function updatePipelineStats(pipeline) {
+            document.getElementById('pipelineIn').textContent = pipeline.incoming;
+            document.getElementById('pipelineProc').textContent = pipeline.processing;
+            document.getElementById('pipelineOut').textContent = pipeline.completed;
+        }
+        
+        // Add email to stream
+        function addEmailToStream(email) {
+            const emailEl = document.createElement('div');
+            emailEl.className = 'email-item animate-slide';
+            emailEl.innerHTML = `
+                <div class="email-avatar">${email.from.split(' ').map(n => n[0]).join('')}</div>
+                <div class="email-content">
+                    <div class="email-from">${email.from}</div>
+                    <div class="email-subject">${email.subject}</div>
+                    <div class="email-preview">${email.preview}</div>
+                </div>
+                <div class="email-meta">
+                    <div class="email-time">just now</div>
+                    <div class="email-status new">NEW</div>
+                </div>
+            `;
+            
+            const emailList = document.getElementById('emailList');
+            emailList.insertBefore(emailEl, emailList.firstChild);
+            
+            // Keep only last 10 emails
+            while (emailList.children.length > 10) {
+                emailList.removeChild(emailList.lastChild);
+            }
+        }
+        
+        // Animate pipeline node
+        function animatePipelineNode(stage) {
+            const nodeMap = {
+                'SCANNING': 'node1',
+                'PARSING': 'node2',
+                'ROUTING': 'node3',
+                'EXECUTING': 'node4'
+            };
+            
+            const nodeId = nodeMap[stage];
+            if (nodeId) {
+                const node = document.getElementById(nodeId);
+                node.classList.add('active');
+                setTimeout(() => node.classList.remove('active'), 500);
+            }
+        }
+        
+        // Add activity item
+        function addActivityItem(data) {
+            const activityEl = document.createElement('div');
+            activityEl.className = 'activity-item animate-slide';
+            activityEl.innerHTML = `
+                <div class="activity-icon success">✓</div>
+                <div class="activity-content">
+                    <div class="activity-action">${data.workflow}</div>
+                    <div class="activity-details">${data.student || 'System'}</div>
+                </div>
+                <div class="activity-time">just now</div>
+            `;
+            
+            const activityList = document.getElementById('activityList');
+            activityList.insertBefore(activityEl, activityList.firstChild);
+            
+            // Keep only last 20 activities
+            while (activityList.children.length > 20) {
+                activityList.removeChild(activityList.lastChild);
+            }
+        }
+        
+        // Complete email processing
+        function completeEmailProcessing(data) {
+            // Update metrics
+            updateAllMetrics(data.metrics);
+            
+            // Show time saved animation
+            showTimeSaved(data.timeSaved);
+            
+            // Transform a calendar block
+            transformRandomCalendarBlock();
+            
+            // Update chart if exists
+            if (typeof trendsChart !== 'undefined') {
+                const lastIndex = trendsChart.data.datasets[0].data.length - 1;
+                trendsChart.data.datasets[0].data[lastIndex] += data.timeSaved / 60;
+                trendsChart.data.datasets[1].data[lastIndex] += 1;
+                trendsChart.update();
+            }
+        }
+        
+        // Show time saved animation
+        function showTimeSaved(minutes) {
+            const float = document.createElement('div');
+            float.className = 'time-float';
+            float.textContent = `+${minutes} min`;
+            float.style.left = '50%';
+            float.style.top = '50%';
+            float.style.transform = 'translate(-50%, -50%)';
+            document.body.appendChild(float);
+            setTimeout(() => float.remove(), 2000);
+        }
+        
+        // Transform random calendar block
+        function transformRandomCalendarBlock() {
+            const blocks = ['tue-block', 'wed-block', 'thu-block'];
+            const randomBlock = blocks[Math.floor(Math.random() * blocks.length)];
+            const block = document.getElementById(randomBlock);
+            
+            if (block && !block.classList.contains('freed')) {
+                block.classList.remove('admin');
+                block.classList.add('freed');
+                block.textContent = block.textContent.replace(/Admin|Emails|Tasks/, 'FREE');
+            }
+        }
+        
+        // Simulate email function - calls backend API
+        function simulateEmail() {
+            fetch('http://localhost:3001/api/simulate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => console.log('Email simulation started:', data))
+            .catch(err => console.error('Error simulating email:', err));
+        }
+        
+        // Initialize Chart
+        const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+        const trendsChart = new Chart(trendsCtx, {
+            type: 'line',
+            data: {
+                labels: ['6am', '8am', '10am', '12pm', '2pm', '4pm', '6pm'],
+                datasets: [
+                    {
+                        label: 'Time Saved',
+                        data: [0.5, 1.2, 1.8, 2.3, 2.7, 3.2, 3.8],
+                        borderColor: '#8B5CF6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Tasks Completed',
+                        data: [2, 5, 8, 12, 15, 18, 22],
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: '#2A2E47',
+                            borderColor: '#2A2E47'
+                        },
+                        ticks: {
+                            color: '#6B7280'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: '#2A2E47',
+                            borderColor: '#2A2E47'
+                        },
+                        ticks: {
+                            color: '#6B7280'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Initialize sparklines
+        function initSparkline(id, data) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.offsetWidth;
+            const height = canvas.height = 40;
+            
+            ctx.strokeStyle = '#8B5CF6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            data.forEach((value, index) => {
+                const x = (index / (data.length - 1)) * width;
+                const y = height - (value / Math.max(...data)) * height;
+                if (index === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            
+            ctx.stroke();
+        }
+        
+        // Initialize sparklines with random data
+        ['spark1', 'spark2', 'spark3', 'spark4', 'spark5'].forEach(id => {
+            const data = Array.from({length: 20}, () => Math.random() * 100);
+            initSparkline(id, data);
+        });
+        
+        // Populate initial emails
+        function populateEmails() {
+            const emailList = document.getElementById('emailList');
+            const initialEmails = [
+                { from: 'David Wilson', initials: 'DW', subject: 'Field trip forms', preview: 'Attached are the signed...', time: '1 hour ago' },
+                { from: 'Amy Brown', initials: 'AB', subject: 'IEP meeting', preview: 'Confirming Tuesday at 2pm...', time: '2 hours ago' },
+                { from: 'Mark Thompson', initials: 'MT', subject: "Jake's progress", preview: 'Wanted to check in about...', time: '3 hours ago' }
+            ];
+            
+            initialEmails.forEach(email => {
+                const emailEl = document.createElement('div');
+                emailEl.className = 'email-item';
+                emailEl.innerHTML = `
+                    <div class="email-avatar">${email.initials}</div>
+                    <div class="email-content">
+                        <div class="email-from">${email.from}</div>
+                        <div class="email-subject">${email.subject}</div>
+                        <div class="email-preview">${email.preview}</div>
+                    </div>
+                    <div class="email-meta">
+                        <div class="email-time">${email.time}</div>
+                    </div>
+                `;
+                emailList.appendChild(emailEl);
+            });
+        }
+        
+        // Initialize on load
+        populateEmails();
+        
+        // Add some initial activities
+        const initialActivities = [
+            { action: 'UPDATE_ATTENDANCE_SYSTEM', student: 'Jake Thompson', time: '8:45 AM' },
+            { action: 'GENERATE_PROGRESS_REPORT', student: 'Emma Wilson', time: '8:30 AM' },
+            { action: 'SCHEDULE_PARENT_MEETING', student: 'Sophia Davis', time: '8:15 AM' }
+        ];
+        
+        initialActivities.forEach(activity => {
+            const activityEl = document.createElement('div');
+            activityEl.className = 'activity-item';
+            activityEl.innerHTML = `
+                <div class="activity-icon success">✓</div>
+                <div class="activity-content">
+                    <div class="activity-action">${activity.action}</div>
+                    <div class="activity-details">${activity.student}</div>
+                </div>
+                <div class="activity-time">${activity.time}</div>
+            `;
+            document.getElementById('activityList').appendChild(activityEl);
+        });
+    </script>
+</body>
+</html>
